@@ -1,0 +1,38 @@
+#!/bin/bash
+
+log="test.log"
+
+get_epoch() {
+  datestr="$1"
+  epoch=$(date --date="${datestr/:/}" +%s 2>/dev/null)
+  if [[ -z $epoch ]]; then
+    epoch=$(date -u -d "$datestr" +"%s" 2>/dev/null)
+  fi
+  echo $epoch
+}
+
+last_log_time=$(tail -n 1 "${log}" | awk '{print substr($4,2) " " substr($5, 1, length($5)-1)}')
+last_time=$(get_epoch "$last_log_time")
+one_minute_ago=$(printf "%.0f" $(echo "$last_time - 60" | bc))
+
+declare -A status_codes
+
+while IFS= read -r line; do
+  log_time=$(echo $line | awk '{print substr($4,2) " " substr($5, 1, length($5)-1)}')
+  time=$(get_epoch $log_time)
+
+  if (( time <= one_minute_ago )); then
+    break
+  fi
+
+  status_code=$(echo $line | awk -F\" '{print $3}' | awk '{print $1}')
+
+  if [[ $status_code =~ ^[0-9]{3}$ ]]; then
+      ((status_codes[$status_code]++))
+  fi
+done < <(tac $log)
+
+for code in "${!status_codes[@]}"; do
+  echo "http_status_code_$code ${status_codes[$code]}"
+done > metrics.prom
+
