@@ -1,0 +1,20 @@
+modules:
+  http_2xx_example1:
+    prober: http
+    http:
+      method: GET
+      valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+      preferred_ip_protocol: "ip4"
+      ip_protocol_fallback: true
+      fail_if_body_matches_regexp:
+        - "Gold Coast, Australia"
+  http_2xx_example2:
+    prober: http
+    http:
+      method: GET
+      valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+      preferred_ip_protocol: "ip4"
+      ip_protocol_fallback: true
+      fail_if_body_matches_regexp:
+        - "Яндекс"
+

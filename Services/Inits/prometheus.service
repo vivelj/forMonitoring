@@ -1,0 +1,28 @@
+[Unit]
+
+Description=Prometheus systemd service unit
+
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+
+Type=simple
+
+User=vivelj    
+
+Group=vivelj    
+ExecReload=/bin/kill -HUP $MAINPID
+ExecStart=/home/vivelj/Monitoring/Prometheus/prometheus \
+--config.file=/home/vivelj/Monitoring/Prometheus/prometheus.yml \
+--storage.tsdb.path=/home/vivelj/Monitoring/Prometheus/lib \
+--web.console.templates=/home/vivelj/Monitoring/Prometheus/consoles \
+--web.console.libraries=/home/vivelj/Monitoring/Prometheus/console_libraries \
+--web.listen-address=0.0.0.0:9090
+
+SyslogIdentifier=prometheus
+Restart=always
+
+[Install]
+
+WantedBy=multi-user.target
